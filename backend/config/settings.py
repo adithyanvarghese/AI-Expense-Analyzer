@@ -15,11 +15,20 @@ load_dotenv(BASE_DIR / ".env")
 # Security
 # -------------------------------------------------
 
-SECRET_KEY = "django-insecure-^uh-&-mi9n@s%rz&6mpk^s6yjlj4vm7#tj_x(okv=8*5=!x9%^"
+SECRET_KEY = os.getenv(
+    "SECRET_KEY",
+    "django-insecure-local-development-key"
+)
 
-DEBUG = True
+DEBUG = os.getenv(
+    "DEBUG",
+    "True"
+).lower() == "true"
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = os.getenv(
+    "ALLOWED_HOSTS",
+    "127.0.0.1,localhost"
+).split(",")
 
 # -------------------------------------------------
 # Installed Apps
@@ -45,10 +54,12 @@ INSTALLED_APPS = [
 # -------------------------------------------------
 
 MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware",
+
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+
     "corsheaders.middleware.CorsMiddleware",
 
-    "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -128,6 +139,12 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+STATICFILES_STORAGE = (
+    "whitenoise.storage.CompressedManifestStaticFilesStorage"
+)
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # -------------------------------------------------
@@ -153,9 +170,11 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^http://localhost:\d+$",
 ]
 
-STATIC_ROOT = BASE_DIR / "staticfiles"
+# Uncomment after frontend deployment
+# CORS_ALLOWED_ORIGINS = [
+#     "https://your-vercel-app.vercel.app",
+# ]
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # -------------------------------------------------
 # Gemini API
 # -------------------------------------------------
