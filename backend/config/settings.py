@@ -167,7 +167,7 @@ SIMPLE_JWT = {
 # -------------------------------------------------
 
 CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"^http://localhost:\d+$",
+    r"^https://.*\.vercel\.app$",
 ]
 
 # Uncomment after frontend deployment
