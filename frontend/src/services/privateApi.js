@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const privateApi = axios.create({
-  baseURL: "https://ai-expense-analyzer-29z5.onrender.com/api/",
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
 privateApi.interceptors.request.use((config) => {
