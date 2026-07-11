@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const publicApi = axios.create({
-    baseURL: "http://127.0.0.1:8000/api/",
+    baseURL: "https://ai-expense-analyzer-29z5.onrender.com/api/",
 });
 
 export default publicApi;
