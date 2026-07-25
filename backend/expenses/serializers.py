@@ -16,3 +16,5 @@ class BudgetSerializer(serializers.ModelSerializer):
         model = Budget
         fields = "__all__"
         read_only_fields = ["user"]
+
+        
