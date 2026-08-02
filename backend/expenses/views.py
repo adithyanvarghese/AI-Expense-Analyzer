@@ -585,42 +585,50 @@ def scan_receipt(request):
 
     image = request.FILES["file"]
 
-    # OCR
-    receipt_text = extract_text(image)
+    try:
+        # OCR
+        receipt_text = extract_text(image)
 
-    if not receipt_text.strip():
+        if not receipt_text or not receipt_text.strip():
+            return Response({
+                "ocr_text": "",
+                "receipt": {
+                    "date": str(date.today()),
+                    "description": "Scanned Receipt",
+                    "category": "Others",
+                    "amount": 0
+                }
+            })
+
+        # Gemini Extraction
+        receipt_data = analyze_receipt(receipt_text)
+
+        # Hybrid Classification
+        description = receipt_data.get("description", "")
+
+        category = classify_by_keyword(description)
+
+        if category is not None:
+            confidence = 100
+        else:
+            category, confidence = predict_category_with_confidence(description)
+            if confidence < 80:
+                category = "Others"
+
+        # Override Gemini category
+        receipt_data["category"] = category
+        receipt_data["confidence"] = confidence
+
+        return Response({
+            "ocr_text": receipt_text,
+            "receipt": receipt_data
+        })
+    except Exception as e:
+        print("scan_receipt error:", e)
         return Response(
-            {"error": "Unable to read receipt"},
+            {"error": f"Failed to scan receipt: {str(e)}"},
             status=status.HTTP_400_BAD_REQUEST
         )
-
-    # Gemini Extraction
-    receipt_data = analyze_receipt(receipt_text)
-
-    # Hybrid Classification
-    description = receipt_data.get("description", "")
-
-    category = classify_by_keyword(description)
-
-    if category is not None:
-
-        confidence = 100
-
-    else:
-
-        category, confidence = predict_category_with_confidence(description)
-
-        if confidence < 80:
-            category = "Others"
-
-    # Override Gemini category
-    receipt_data["category"] = category
-    receipt_data["confidence"] = confidence
-
-    return Response({
-        "ocr_text": receipt_text,
-        "receipt": receipt_data
-    })
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
