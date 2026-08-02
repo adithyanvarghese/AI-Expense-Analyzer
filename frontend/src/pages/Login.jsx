@@ -59,7 +59,11 @@ export default function Login() {
       navigate("/dashboard");
     } catch (err) {
       console.error(err);
-      setErrorMsg("Invalid username or password. Please check your credentials.");
+      if (err.code === "ERR_NETWORK") {
+        setErrorMsg("Unable to connect to backend server. Please check your connection.");
+      } else {
+        setErrorMsg("Invalid username or password. Please check your credentials.");
+      }
     } finally {
       setLoading(false);
     }
@@ -85,12 +89,14 @@ export default function Login() {
             onChange={handleChange}
             fullWidth
             required
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <PersonIcon sx={{ color: "text.secondary" }} />
-                </InputAdornment>
-              ),
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PersonIcon sx={{ color: "text.secondary" }} />
+                  </InputAdornment>
+                ),
+              },
             }}
           />
 
@@ -102,22 +108,24 @@ export default function Login() {
             onChange={handleChange}
             fullWidth
             required
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <LockIcon sx={{ color: "text.secondary" }} />
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowPassword(!showPassword)}
-                    edge="end"
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockIcon sx={{ color: "text.secondary" }} />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
             }}
           />
 

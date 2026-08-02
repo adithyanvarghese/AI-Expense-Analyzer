@@ -1,10 +1,9 @@
 import axios from "axios";
 
-console.log("ENV =", import.meta.env);
-console.log("API =", import.meta.env.VITE_API_URL);
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://ai-expense-analyzer-29z5.onrender.com/api/";
 
 const publicApi = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+  baseURL: API_BASE_URL,
 });
 
 export default publicApi;

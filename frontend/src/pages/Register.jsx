@@ -67,6 +67,8 @@ export default function Register() {
         const firstKey = Object.keys(backendError)[0];
         const val = backendError[firstKey];
         setErrorMsg(`${firstKey}: ${Array.isArray(val) ? val.join(", ") : val}`);
+      } else if (err.code === "ERR_NETWORK") {
+        setErrorMsg("Unable to connect to backend server. Please check your network connection.");
       } else {
         setErrorMsg("Failed to register account. Please try again.");
       }
@@ -101,12 +103,14 @@ export default function Register() {
             onChange={handleChange}
             fullWidth
             required
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <PersonIcon sx={{ color: "text.secondary" }} />
-                </InputAdornment>
-              ),
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PersonIcon sx={{ color: "text.secondary" }} />
+                  </InputAdornment>
+                ),
+              },
             }}
           />
 
@@ -118,12 +122,14 @@ export default function Register() {
             onChange={handleChange}
             fullWidth
             required
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <EmailIcon sx={{ color: "text.secondary" }} />
-                </InputAdornment>
-              ),
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <EmailIcon sx={{ color: "text.secondary" }} />
+                  </InputAdornment>
+                ),
+              },
             }}
           />
 
@@ -135,22 +141,24 @@ export default function Register() {
             onChange={handleChange}
             fullWidth
             required
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <LockIcon sx={{ color: "text.secondary" }} />
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowPassword(!showPassword)}
-                    edge="end"
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockIcon sx={{ color: "text.secondary" }} />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
             }}
           />
 
