@@ -1,6 +1,7 @@
 from pathlib import Path
 from datetime import timedelta
 import os
+import dj_database_url
 from dotenv import load_dotenv
 
 # =====================================================
@@ -25,10 +26,11 @@ DEBUG = os.getenv(
     "True"
 ).lower() == "true"
 
-ALLOWED_HOSTS = os.getenv(
-    "ALLOWED_HOSTS",
-    "127.0.0.1,localhost"
-).split(",")
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+    if host.strip()
+]
 
 # =====================================================
 # Installed Apps
@@ -96,11 +98,16 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # =====================================================
 
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
+if not DATABASE_URL:
+    DATABASE_URL = f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    "default": dj_database_url.parse(
+        DATABASE_URL,
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 }
 
 # =====================================================
