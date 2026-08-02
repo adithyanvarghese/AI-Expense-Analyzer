@@ -6,6 +6,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 
 import App from "./App";
 import theme from "./theme/theme";
+import "./index.css";
 
 import { AuthProvider } from "./context/AuthContext";
 

@@ -1,141 +1,156 @@
 import { useState, useContext } from "react";
 import {
-    TextField,
-    Button,
-    Stack,
-    Link
+  TextField,
+  Button,
+  Stack,
+  Link,
+  InputAdornment,
+  IconButton,
+  Alert,
+  CircularProgress,
+  Box,
+  Typography,
 } from "@mui/material";
+import PersonIcon from "@mui/icons-material/Person";
+import LockIcon from "@mui/icons-material/Lock";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
 import { Link as RouterLink, useNavigate } from "react-router-dom";
-
 import AuthLayout from "../layouts/AuthLayout";
 import { loginUser } from "../services/authService";
 import { AuthContext } from "../context/AuthContext";
 
 export default function Login() {
+  const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
 
-    const navigate = useNavigate();
+  const [form, setForm] = useState({
+    username: "",
+    password: "",
+  });
 
-    const { login } = useContext(AuthContext);
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-    const [form, setForm] = useState({
-
-        username: "",
-        password: ""
-
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
     });
+    if (errorMsg) setErrorMsg("");
+  };
 
-    const handleChange = (e) => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.username || !form.password) {
+      setErrorMsg("Please enter username and password.");
+      return;
+    }
 
-        setForm({
+    setLoading(true);
+    setErrorMsg("");
 
-            ...form,
+    try {
+      const tokens = await loginUser(form);
+      login(tokens, form.username);
+      navigate("/dashboard");
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("Invalid username or password. Please check your credentials.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            [e.target.name]: e.target.value
+  return (
+    <AuthLayout
+      title="Welcome Back"
+      subtitle="Enter your credentials to access your dashboard"
+    >
+      {errorMsg && (
+        <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+          {errorMsg}
+        </Alert>
+      )}
 
-        });
+      <form onSubmit={handleSubmit}>
+        <Stack spacing={2.5}>
+          <TextField
+            label="Username"
+            name="username"
+            value={form.username}
+            onChange={handleChange}
+            fullWidth
+            required
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <PersonIcon sx={{ color: "text.secondary" }} />
+                </InputAdornment>
+              ),
+            }}
+          />
 
-    };
+          <TextField
+            label="Password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            value={form.password}
+            onChange={handleChange}
+            fullWidth
+            required
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <LockIcon sx={{ color: "text.secondary" }} />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowPassword(!showPassword)}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
 
-    const handleSubmit = async (e) => {
+          <Button
+            type="submit"
+            variant="contained"
+            size="large"
+            disabled={loading}
+            endIcon={!loading && <ArrowForwardIcon />}
+            sx={{
+              py: 1.5,
+              fontSize: "1rem",
+              mt: 1,
+            }}
+          >
+            {loading ? <CircularProgress size={24} color="inherit" /> : "Sign In"}
+          </Button>
 
-        e.preventDefault();
-
-        try {
-
-            const tokens = await loginUser(form);
-
-            login(tokens, form.username);
-
-            navigate("/dashboard");
-
-        }
-
-        catch (err) {
-
-            console.log(err);
-
-            alert("Invalid username or password");
-
-        }
-
-    };
-
-    return (
-
-        <AuthLayout
-            title="Welcome Back"
-            subtitle="Login to continue"
-        >
-
-            <form onSubmit={handleSubmit}>
-
-                <Stack spacing={3}>
-
-                    <TextField
-
-                        label="Username"
-
-                        name="username"
-
-                        value={form.username}
-
-                        onChange={handleChange}
-
-                        fullWidth
-
-                    />
-
-                    <TextField
-
-                        label="Password"
-
-                        name="password"
-
-                        type="password"
-
-                        value={form.password}
-
-                        onChange={handleChange}
-
-                        fullWidth
-
-                    />
-
-                    <Button
-
-                        type="submit"
-
-                        variant="contained"
-
-                        size="large"
-
-                    >
-
-                        Login
-
-                    </Button>
-
-                    <Link
-
-                        component={RouterLink}
-
-                        to="/register"
-
-                        underline="hover"
-
-                    >
-
-                        Don't have an account?
-
-                    </Link>
-
-                </Stack>
-
-            </form>
-
-        </AuthLayout>
-
-    );
-
+          <Box sx={{ textAlign: "center", mt: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              Don't have an account?{" "}
+              <Link
+                component={RouterLink}
+                to="/register"
+                underline="hover"
+                sx={{ color: "#6366F1", fontWeight: 700 }}
+              >
+                Create Account
+              </Link>
+            </Typography>
+          </Box>
+        </Stack>
+      </form>
+    </AuthLayout>
+  );
 }

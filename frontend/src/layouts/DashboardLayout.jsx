@@ -1,35 +1,35 @@
+import { useState } from "react";
 import { Box } from "@mui/material";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 
 export default function DashboardLayout({ children }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-    return (
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
 
-        <Box sx={{ display: "flex" }}>
+  return (
+    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#0B0F19" }}>
+      <Sidebar mobileOpen={mobileOpen} onClose={handleDrawerToggle} />
 
-            <Sidebar />
+      <Box
+        sx={{
+          flexGrow: 1,
+          display: "flex",
+          flexDirection: "column",
+          minWidth: 0,
+          width: { md: `calc(100% - 260px)` },
+          bgcolor: "#0B0F19",
+        }}
+      >
+        <Navbar onMenuClick={handleDrawerToggle} />
 
-            <Box
-                sx={{
-                    flexGrow: 1,
-                    minHeight: "100vh",
-                    bgcolor: "#f4f6f9"
-                }}
-            >
-
-                <Navbar />
-
-                <Box sx={{ p: 3 }}>
-
-                    {children}
-
-                </Box>
-
-            </Box>
-
+        <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, flexGrow: 1, width: "100%", overflowX: "hidden" }}>
+          {children}
         </Box>
-
-    );
-
+      </Box>
+    </Box>
+  );
 }
