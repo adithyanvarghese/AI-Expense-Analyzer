@@ -9,6 +9,7 @@ import {
   Alert,
   CircularProgress,
   Box,
+  Typography,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import EmailIcon from "@mui/icons-material/Email";
