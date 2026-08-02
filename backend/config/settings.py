@@ -28,7 +28,7 @@ DEBUG = os.getenv(
 
 ALLOWED_HOSTS = [
     host.strip()
-    for host in os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+    for host in os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost,.onrender.com,*").split(",")
     if host.strip()
 ]
 
@@ -99,16 +99,25 @@ WSGI_APPLICATION = "config.wsgi.application"
 # =====================================================
 
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
-if not DATABASE_URL:
-    DATABASE_URL = f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
 
-DATABASES = {
-    "default": dj_database_url.parse(
+if DATABASE_URL:
+    db_config = dj_database_url.parse(
         DATABASE_URL,
         conn_max_age=600,
         conn_health_checks=True,
     )
-}
+    if DATABASE_URL.startswith("postgres://") or DATABASE_URL.startswith("postgresql://"):
+        ssl_require = os.getenv("DATABASE_SSL_REQUIRE", "True" if not DEBUG else "False").lower() == "true"
+        if ssl_require:
+            db_config.setdefault("OPTIONS", {})["sslmode"] = "require"
+    DATABASES = {"default": db_config}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 # =====================================================
 # Password Validation
@@ -149,9 +158,16 @@ STATIC_URL = "/static/"
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-STATICFILES_STORAGE = (
-    "whitenoise.storage.CompressedManifestStaticFilesStorage"
-)
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -174,16 +190,22 @@ SIMPLE_JWT = {
 # CORS
 # =====================================================
 
-# Local Development
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-]
+cors_origins_env = os.getenv("CORS_ALLOWED_ORIGINS", "").strip()
+if cors_origins_env:
+    CORS_ALLOWED_ORIGINS = [
+        origin.strip() for origin in cors_origins_env.split(",") if origin.strip()
+    ]
+else:
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ]
 
-# Production (Vercel)
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https://.*\.vercel\.app$",
 ]
 
+CORS_ALLOW_ALL_ORIGINS = os.getenv("CORS_ALLOW_ALL_ORIGINS", "True").lower() == "true"
 CORS_ALLOW_CREDENTIALS = True
 
 # =====================================================
