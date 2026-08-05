@@ -1,0 +1,19 @@
+HDFC BANK ACCOUNT STATEMENT
+Account Number: 50100234567891
+Statement Period: 01-Jul-2026 to 31-Jul-2026
+
+Txn Date,Narration,Chq/Ref No,Debit Amount,Credit Amount,Closing Balance
+01/07/2026,Swiggy Food Order,REF1001,450.00,,49550.00
+02/07/2026,Indian Oil Fuel Station,REF1002,1250.00,,48300.00
+04/07/2026,Uber India Ride,REF1003,320.00,,47980.00
+05/07/2026,Amazon Shopping India,REF1004,2499.00,,45481.00
+08/07/2026,Airtel Broadband Bill,REF1005,999.00,,44482.00
+10/07/2026,Reliance Fresh Grocery,REF1006,1850.50,,42631.50
+12/07/2026,ATM Cash Withdrawal,ATM502,2000.00,,40631.50
+15/07/2026,Salary Credit ACME Corp,REF1007,,65000.00,105631.50
+18/07/2026,Netflix Premium Subscription,REF1008,649.00,,104982.50
+20/07/2026,Zomato Restaurant Order,REF1009,580.00,,104402.50
+22/07/2026,Zerodha SIP Mutual Fund,REF1010,5000.00,,99402.50
+25/07/2026,Apollo Pharmacy Medical,REF1011,420.00,,98982.50
+28/07/2026,Electricity Utility Bill,REF1012,1840.00,,97142.50
+30/07/2026,HPCL Fuel Refill,REF1013,1500.00,,95642.50

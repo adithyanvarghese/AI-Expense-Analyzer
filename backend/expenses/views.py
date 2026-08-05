@@ -23,7 +23,7 @@ from .ai.receipt_analyzer import analyze_receipt
 # Service Modules
 # ==========================
 from .services.ocr_service import extract_text
-from .services.statement_parser import parse_csv
+from .services.statement_parser import parse_statement, parse_csv
 
 # ML
 
@@ -123,7 +123,6 @@ def expense_detail(request, pk):
 def upload_csv(request):
 
     if "file" not in request.FILES:
-
         return Response(
             {"error": "No file uploaded"},
             status=status.HTTP_400_BAD_REQUEST
@@ -131,23 +130,66 @@ def upload_csv(request):
 
     file = request.FILES["file"]
 
-    df = pd.read_csv(file)
-
-    new_expenses = [
-        Expense(
-            user=request.user,
-            date=row["date"],
-            category=row["category"],
-            amount=row["amount"],
-            description=row["description"],
+    try:
+        transactions = parse_statement(file, file.name)
+    except Exception as e:
+        return Response(
+            {"error": f"Failed to parse file: {str(e)}"},
+            status=status.HTTP_400_BAD_REQUEST
         )
-        for _, row in df.iterrows()
-    ]
-    Expense.objects.bulk_create(new_expenses)
+
+    if not transactions:
+        return Response(
+            {"error": "No valid expense transactions could be extracted from this file."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    expenses_to_create = []
+    imported = 0
+    skipped = 0
+
+    for transaction in transactions:
+        if Expense.objects.filter(
+            user=request.user,
+            date=transaction["date"],
+            amount=transaction["amount"],
+            description=transaction["description"]
+        ).exists():
+            skipped += 1
+            continue
+
+        csv_category = str(transaction.get("category", "")).strip()
+
+        if csv_category != "" and csv_category.lower() not in ["nan", "null", "none"]:
+            category = csv_category
+        else:
+            category = classify_by_keyword(transaction["description"])
+            if category is None:
+                category, confidence = predict_category_with_confidence(
+                    transaction["description"]
+                )
+                if confidence < 80:
+                    category = "Others"
+
+        expenses_to_create.append(
+            Expense(
+                user=request.user,
+                date=transaction["date"],
+                category=category,
+                amount=transaction["amount"],
+                description=transaction["description"],
+            )
+        )
+        imported += 1
+
+    if expenses_to_create:
+        Expense.objects.bulk_create(expenses_to_create)
 
     return Response(
         {
-            "message": "CSV uploaded successfully"
+            "message": "File uploaded and expenses imported successfully",
+            "transactions_imported": imported,
+            "duplicates_skipped": skipped,
         }
     )
 
@@ -643,11 +685,17 @@ def upload_statement(request):
     file = request.FILES["file"]
 
     try:
-        transactions = parse_csv(file)
+        transactions = parse_statement(file, file.name)
 
     except Exception as e:
         return Response(
             {"error": str(e)},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if not transactions:
+        return Response(
+            {"error": "No valid expense transactions could be extracted from this statement file."},
             status=status.HTTP_400_BAD_REQUEST
         )
 
@@ -671,12 +719,12 @@ def upload_statement(request):
             continue
 
         # ----------------------------------------
-        # Use CSV category if available
-        # Otherwise predict using ML
+        # Use CSV/Statement category if available
+        # Otherwise predict using ML / keyword classifier
         # ----------------------------------------
         csv_category = str(transaction.get("category", "")).strip()
 
-        if csv_category != "" and csv_category.lower() != "nan":
+        if csv_category != "" and csv_category.lower() not in ["nan", "null", "none"]:
 
             category = csv_category
 
@@ -715,10 +763,21 @@ def upload_statement(request):
     if expenses_to_create:
         Expense.objects.bulk_create(expenses_to_create)
 
+    preview = [
+        {
+            "date": item.date,
+            "description": item.description,
+            "category": item.category,
+            "amount": float(item.amount),
+        }
+        for item in expenses_to_create[:10]
+    ]
+
     return Response({
         "message": "Statement imported successfully",
         "transactions_imported": imported,
-        "duplicates_skipped": skipped
+        "duplicates_skipped": skipped,
+        "preview": preview,
     })
 
 @api_view(["POST"])

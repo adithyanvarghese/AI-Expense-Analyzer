@@ -8,6 +8,13 @@ import {
   LinearProgress,
   Stack,
   Grid,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TableContainer,
 } from "@mui/material";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -33,7 +40,7 @@ export default function StatementUpload() {
 
   async function handleUpload() {
     if (!file) {
-      setErrorMsg("Please choose a statement CSV file to upload.");
+      setErrorMsg("Please choose a statement CSV or PDF file to upload.");
       return;
     }
 
@@ -57,7 +64,16 @@ export default function StatementUpload() {
       setResult(response.data);
     } catch (err) {
       console.error(err);
-      setErrorMsg("Failed to process statement. Please ensure it is a valid CSV statement format.");
+      const data = err.response?.data;
+      let msg = "Failed to process statement. Please check the file format.";
+      if (typeof data === "string") {
+        msg = data;
+      } else if (data?.error) {
+        msg = data.error;
+      } else if (data?.detail) {
+        msg = data.detail;
+      }
+      setErrorMsg(msg);
     } finally {
       setLoading(false);
     }
@@ -70,12 +86,12 @@ export default function StatementUpload() {
           Bank Statement Import
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Upload your bank or credit card CSV statement. Transactions will be parsed and auto-categorized by AI.
+          Upload your bank or credit card CSV/PDF statement. Transactions will be parsed and auto-categorized by AI.
         </Typography>
       </Box>
 
       <Grid container spacing={4}>
-        <Grid size={{ xs: 12, md: 7 }}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Paper className="glass-card" sx={{ p: 4, borderRadius: 4 }}>
             <Box
               sx={{
@@ -90,14 +106,14 @@ export default function StatementUpload() {
               }}
               component="label"
             >
-              <input hidden type="file" accept=".csv" onChange={handleFileChange} />
+              <input hidden type="file" accept=".csv,.pdf" onChange={handleFileChange} />
 
               <UploadFileIcon sx={{ fontSize: 56, color: "#818CF8", mb: 1 }} />
               <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                {file ? file.name : "Select CSV Bank Statement"}
+                {file ? file.name : "Select Bank Statement (CSV or PDF)"}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                Click to browse files (CSV format)
+                Supports statements from HDFC, SBI, ICICI, Axis, Chase, BoA & all major banks
               </Typography>
             </Box>
 
@@ -115,7 +131,7 @@ export default function StatementUpload() {
               startIcon={<UploadFileIcon />}
               sx={{ mt: 3, width: "100%", py: 1.5 }}
             >
-              {loading ? "Processing Transactions..." : "Import Bank Statement"}
+              {loading ? "Processing Statement..." : "Import Bank Statement"}
             </Button>
 
             {loading && (
@@ -126,7 +142,7 @@ export default function StatementUpload() {
           </Paper>
         </Grid>
 
-        <Grid size={{ xs: 12, md: 5 }}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Paper className="glass-card" sx={{ p: 4, borderRadius: 4 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
               Import Summary
@@ -136,7 +152,7 @@ export default function StatementUpload() {
               <Box sx={{ textCenter: "center", textAlign: "center", py: 5 }}>
                 <DescriptionIcon sx={{ fontSize: 48, color: "text.secondary", mb: 1 }} />
                 <Typography variant="body2" color="text.secondary">
-                  Uploaded statement results and import statistics will appear here.
+                  Uploaded statement results and imported transactions will appear here.
                 </Typography>
               </Box>
             ) : (
@@ -145,23 +161,63 @@ export default function StatementUpload() {
                   Statement Processed Successfully!
                 </Alert>
 
-                <Paper sx={{ p: 2, bgcolor: "rgba(255, 255, 255, 0.03)", borderRadius: 3 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Transactions Imported
-                  </Typography>
-                  <Typography variant="h4" sx={{ fontWeight: 800, color: "#10B981" }}>
-                    {result.transactions_imported || 0}
-                  </Typography>
-                </Paper>
+                <Grid container spacing={2}>
+                  <Grid size={{ xs: 6 }}>
+                    <Paper sx={{ p: 2, bgcolor: "rgba(255, 255, 255, 0.03)", borderRadius: 3 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Transactions Imported
+                      </Typography>
+                      <Typography variant="h4" sx={{ fontWeight: 800, color: "#10B981" }}>
+                        {result.transactions_imported || 0}
+                      </Typography>
+                    </Paper>
+                  </Grid>
 
-                <Paper sx={{ p: 2, bgcolor: "rgba(255, 255, 255, 0.03)", borderRadius: 3 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Duplicates Skipped
-                  </Typography>
-                  <Typography variant="h4" sx={{ fontWeight: 800, color: "#F59E0B" }}>
-                    {result.duplicates_skipped || 0}
-                  </Typography>
-                </Paper>
+                  <Grid size={{ xs: 6 }}>
+                    <Paper sx={{ p: 2, bgcolor: "rgba(255, 255, 255, 0.03)", borderRadius: 3 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Duplicates Skipped
+                      </Typography>
+                      <Typography variant="h4" sx={{ fontWeight: 800, color: "#F59E0B" }}>
+                        {result.duplicates_skipped || 0}
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                </Grid>
+
+                {result.preview && result.preview.length > 0 && (
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
+                      Imported Preview
+                    </Typography>
+                    <TableContainer component={Paper} sx={{ bgcolor: "rgba(255, 255, 255, 0.02)", borderRadius: 2 }}>
+                      <Table size="small">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Date</TableCell>
+                            <TableCell>Description</TableCell>
+                            <TableCell>Category</TableCell>
+                            <TableCell align="right">Amount</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {result.preview.map((tx, i) => (
+                            <TableRow key={i}>
+                              <TableCell sx={{ fontSize: "0.8rem" }}>{tx.date}</TableCell>
+                              <TableCell sx={{ fontSize: "0.8rem" }}>{tx.description}</TableCell>
+                              <TableCell>
+                                <Chip label={tx.category} size="small" color="primary" variant="outlined" />
+                              </TableCell>
+                              <TableCell align="right" sx={{ fontWeight: 700, fontSize: "0.8rem" }}>
+                                ₹{tx.amount}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Box>
+                )}
               </Stack>
             )}
           </Paper>

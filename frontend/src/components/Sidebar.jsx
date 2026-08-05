@@ -151,11 +151,16 @@ export default function Sidebar({ mobileOpen, onClose }) {
               </ListItemIcon>
 
               <ListItemText
-                primary={item.text}
-                primaryTypographyProps={{
-                  fontSize: "0.92rem",
-                  fontWeight: isSelected ? 700 : 500,
-                }}
+                primary={
+                  <Typography
+                    sx={{
+                      fontSize: "0.92rem",
+                      fontWeight: isSelected ? 700 : 500,
+                    }}
+                  >
+                    {item.text}
+                  </Typography>
+                }
               />
 
               {item.badge && (
@@ -228,8 +233,11 @@ export default function Sidebar({ mobileOpen, onClose }) {
             <LogoutIcon fontSize="small" />
           </ListItemIcon>
           <ListItemText
-            primary="Logout"
-            primaryTypographyProps={{ fontSize: "0.9rem", fontWeight: 600 }}
+            primary={
+              <Typography sx={{ fontSize: "0.9rem", fontWeight: 600 }}>
+                Logout
+              </Typography>
+            }
           />
         </ListItemButton>
       </Box>

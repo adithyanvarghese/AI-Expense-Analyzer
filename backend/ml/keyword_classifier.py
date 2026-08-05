@@ -5,36 +5,87 @@ def classify_by_keyword(description):
     keywords = {
 
         "Food": [
+            "restaurant",
             "swiggy",
             "zomato",
-            "restaurant",
+            "cafe",
+            "dining",
+            "food",
             "pizza",
             "burger",
             "kfc",
             "dominos",
             "mcdonald",
-            "food",
-            "cafe"
+            "eatery",
+            "bakery"
+        ],
+
+        "Fuel": [
+            "fuel",
+            "petrol",
+            "diesel",
+            "indian oil",
+            "bharat petroleum",
+            "hp petrol",
+            "bpc",
+            "ioc",
+            "hpcl",
+            "shell"
+        ],
+
+        "Bills": [
+            "utility bill",
+            "utility",
+            "bill",
+            "electricity",
+            "water",
+            "gas",
+            "recharge",
+            "mobile",
+            "broadband",
+            "airtel",
+            "jio",
+            "vi",
+            "bsnl"
+        ],
+
+        "Grocery": [
+            "grocery",
+            "supermarket",
+            "mart",
+            "dmart",
+            "big bazaar",
+            "reliance fresh",
+            "blinkit",
+            "zepto",
+            "instamart",
+            "bigbasket"
+        ],
+
+        "Shopping": [
+            "online purchase",
+            "purchase",
+            "shopping",
+            "store",
+            "amazon",
+            "flipkart",
+            "myntra",
+            "ajio",
+            "meesho",
+            "retail"
         ],
 
         "Travel": [
             "uber",
             "ola",
+            "rapido",
             "irctc",
             "train",
             "metro",
             "flight",
             "bus",
-            "taxi"
-        ],
-
-        "Shopping": [
-            "amazon",
-            "flipkart",
-            "myntra",
-            "ajio",
-            "shopping",
-            "store"
+            "taxi",
+            "toll"
         ],
 
         "Entertainment": [
@@ -43,16 +94,8 @@ def classify_by_keyword(description):
             "bookmyshow",
             "movie",
             "prime",
-            "hotstar"
-        ],
-
-        "Fuel": [
-            "petrol",
-            "diesel",
-            "indian oil",
-            "bharat petroleum",
-            "hp petrol",
-            "fuel"
+            "hotstar",
+            "cinema"
         ],
 
         "Healthcare": [
@@ -60,26 +103,8 @@ def classify_by_keyword(description):
             "apollo",
             "pharmacy",
             "clinic",
-            "medical"
-        ],
-
-        "Bills": [
-            "electricity",
-            "water bill",
-            "internet",
-            "wifi",
-            "airtel",
-            "jio",
-            "bsnl",
-            "bill"
-        ],
-
-        "Grocery": [
-            "dmart",
-            "big bazaar",
-            "reliance fresh",
-            "grocery",
-            "supermarket"
+            "medical",
+            "doctor"
         ],
 
         "Investment": [
@@ -87,7 +112,19 @@ def classify_by_keyword(description):
             "sip",
             "zerodha",
             "groww",
-            "investment"
+            "investment",
+            "stocks"
+        ],
+
+        "Others": [
+            "neft transfer",
+            "neft",
+            "upi payment",
+            "upi",
+            "atm withdrawal",
+            "cash withdrawal",
+            "transfer",
+            "withdrawal"
         ]
     }
 
