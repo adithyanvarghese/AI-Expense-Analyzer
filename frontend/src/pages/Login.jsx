@@ -45,7 +45,8 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.username || !form.password) {
+    const cleanUsername = form.username.trim();
+    if (!cleanUsername || !form.password) {
       setErrorMsg("Please enter username and password.");
       return;
     }
@@ -54,8 +55,9 @@ export default function Login() {
     setErrorMsg("");
 
     try {
-      const tokens = await loginUser(form);
-      login(tokens, form.username);
+      const payload = { username: cleanUsername, password: form.password };
+      const tokens = await loginUser(payload);
+      login(tokens, cleanUsername);
       navigate("/dashboard");
     } catch (err) {
       console.error(err);
@@ -83,13 +85,19 @@ export default function Login() {
       <form onSubmit={handleSubmit}>
         <Stack spacing={2.5}>
           <TextField
-            label="Username"
+            label="Username or Email"
             name="username"
             value={form.username}
             onChange={handleChange}
             fullWidth
             required
             slotProps={{
+              htmlInput: {
+                autoCapitalize: "none",
+                autoCorrect: "off",
+                spellCheck: "false",
+                autoComplete: "username",
+              },
               input: {
                 startAdornment: (
                   <InputAdornment position="start">

@@ -46,7 +46,10 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.username || !form.email || !form.password) {
+    const cleanUsername = form.username.trim();
+    const cleanEmail = form.email.trim();
+
+    if (!cleanUsername || !cleanEmail || !form.password) {
       setErrorMsg("Please fill in all fields.");
       return;
     }
@@ -55,7 +58,11 @@ export default function Register() {
     setErrorMsg("");
 
     try {
-      await registerUser(form);
+      await registerUser({
+        username: cleanUsername,
+        email: cleanEmail,
+        password: form.password,
+      });
       setSuccessMsg("Account created successfully! Redirecting to login...");
       setTimeout(() => {
         navigate("/login");
@@ -104,6 +111,12 @@ export default function Register() {
             fullWidth
             required
             slotProps={{
+              htmlInput: {
+                autoCapitalize: "none",
+                autoCorrect: "off",
+                spellCheck: "false",
+                autoComplete: "username",
+              },
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
@@ -123,6 +136,12 @@ export default function Register() {
             fullWidth
             required
             slotProps={{
+              htmlInput: {
+                autoCapitalize: "none",
+                autoCorrect: "off",
+                spellCheck: "false",
+                autoComplete: "email",
+              },
               input: {
                 startAdornment: (
                   <InputAdornment position="start">

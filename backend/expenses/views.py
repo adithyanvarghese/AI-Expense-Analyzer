@@ -133,15 +133,17 @@ def upload_csv(request):
 
     df = pd.read_csv(file)
 
-    for _, row in df.iterrows():
-
-        Expense.objects.create(
+    new_expenses = [
+        Expense(
             user=request.user,
             date=row["date"],
             category=row["category"],
             amount=row["amount"],
             description=row["description"],
         )
+        for _, row in df.iterrows()
+    ]
+    Expense.objects.bulk_create(new_expenses)
 
     return Response(
         {
@@ -501,20 +503,18 @@ def budget_status(request):
 
     budgets = Budget.objects.filter(user=request.user)
 
+    category_totals = dict(
+        Expense.objects.filter(user=request.user)
+        .values("category")
+        .annotate(total=Sum("amount"))
+        .values_list("category", "total")
+    )
+
     result = []
 
     for budget in budgets:
 
-        spent = (
-            Expense.objects.filter(
-                user=request.user,
-                category=budget.category
-            ).aggregate(
-                total=Sum("amount")
-            )["total"] or 0
-        )
-
-        spent = float(spent)
+        spent = float(category_totals.get(budget.category, 0) or 0)
         limit = float(budget.monthly_budget)
 
         remaining = limit - spent
@@ -653,6 +653,7 @@ def upload_statement(request):
 
     imported = 0
     skipped = 0
+    expenses_to_create = []
 
     for transaction in transactions:
 
@@ -697,17 +698,22 @@ def upload_statement(request):
                 confidence = 100
 
         # ----------------------------------------
-        # Save expense
+        # Collect expense for bulk creation
         # ----------------------------------------
-        Expense.objects.create(
-            user=request.user,
-            date=transaction["date"],
-            category=category,
-            amount=transaction["amount"],
-            description=transaction["description"]
+        expenses_to_create.append(
+            Expense(
+                user=request.user,
+                date=transaction["date"],
+                category=category,
+                amount=transaction["amount"],
+                description=transaction["description"]
+            )
         )
 
         imported += 1
+
+    if expenses_to_create:
+        Expense.objects.bulk_create(expenses_to_create)
 
     return Response({
         "message": "Statement imported successfully",

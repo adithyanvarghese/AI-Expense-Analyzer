@@ -20,6 +20,13 @@ class Expense(models.Model):
 
     description = models.TextField(blank=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["user", "date"]),
+            models.Index(fields=["user", "category"]),
+            models.Index(fields=["date"]),
+        ]
+
     def __str__(self):
         return f"{self.category} - ₹{self.amount}"
     
@@ -38,6 +45,11 @@ class Budget(models.Model):
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["user", "category"]),
+        ]
 
     def __str__(self):
         return f"{self.user.username} - {self.category}"

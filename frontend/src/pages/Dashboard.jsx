@@ -28,8 +28,10 @@ export default function Dashboard() {
   async function loadDashboard() {
     try {
       setLoading(true);
-      const summaryData = await getDashboardSummary();
-      const charts = await getChartData();
+      const [summaryData, charts] = await Promise.all([
+        getDashboardSummary(),
+        getChartData(),
+      ]);
       setSummary(summaryData);
       setChartData(charts);
     } catch (err) {
